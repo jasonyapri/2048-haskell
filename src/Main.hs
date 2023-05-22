@@ -10,31 +10,45 @@ data Record = Record
   }
   deriving (Show)
 
-type Database = [Record]
+data Database = Database
+  { records :: [Record],
+    currentPlayerName :: String,
+    currentPlayerHighScore :: Int
+  }
+  deriving (Show)
 
 initialDB :: Database
-initialDB = []
+initialDB =
+  Database
+    { records = [],
+      currentPlayerName = "",
+      currentPlayerHighScore = 0
+    }
 
 createRecord :: Record -> StateT Database (MaybeT IO) ()
-createRecord record = modify (\db -> record : db)
+createRecord record = modify (\db -> db {records = record : records db})
 
 readRecord :: String -> StateT Database (MaybeT IO) Record
 readRecord input = do
   db <- get
-  let matchingRecords = filter (\record -> input == (name record)) db
+  let matchingRecords = filter (\record -> input == (name record)) (records db)
   case matchingRecords of
     [] -> liftIO $ putStrLn "Record not found." >> fail "Record not found."
     (p : _) -> return p
 
 updateRecord :: String -> Int -> StateT Database (MaybeT IO) ()
-updateRecord input newAge = do
+updateRecord input newScore = do
   record <- readRecord input
-  modify (\db -> map (\p -> if (name p) == input then p {score = newAge} else p) db)
+  modify (\db -> db {records = map updateScore (records db)})
+  where
+    updateScore p
+      | name p == input = p {score = newScore}
+      | otherwise = p
 
 deleteRecord :: String -> StateT Database (MaybeT IO) ()
 deleteRecord input = do
   record <- readRecord input
-  modify (\db -> filter (\p -> (name p) /= input) db)
+  modify (\db -> db {records = filter (\p -> name p /= input) (records db)})
 
 promptString :: String -> IO String
 promptString prompt = do
@@ -128,7 +142,7 @@ main = do
   putStrLn ""
   let combinedActions = askForName >> mainMenu
 
-  result <- runMaybeT (runStateT combinedActions [])
+  result <- runMaybeT (runStateT combinedActions initialDB)
   case result of
     Just (_, finalDatabase) -> do
       putStrLn "~Come back anytime~"
