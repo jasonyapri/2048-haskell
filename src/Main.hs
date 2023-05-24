@@ -1,3 +1,7 @@
+-- \****** 2048 GAME IN HASKELL *******
+-- \***** created by Jason Yapri ******
+-- \**** https://jasonyapri.com/ ******
+
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Maybe
@@ -329,6 +333,7 @@ playGame score = do
         then do
           updateRecord (currentPlayerName db) score False
           liftIO $ putStrLn ("Your last score: " ++ show score ++ "(NEW HIGH SCORE)")
+          liftIO $ putStrLn ""
         else do
           liftIO $ putStrLn ("Current high score: " ++ show (fromMaybe 0 highScore))
       mainMenu
@@ -403,6 +408,7 @@ mainMenu = do
   liftIO $ putStrLn "4. Hack Leaderboard (Modify)"
   liftIO $ putStrLn "5. Hack Leaderboard (Remove)"
   liftIO $ putStrLn "6. Hack Leaderboard (Reset)"
+  liftIO $ putStrLn "9. Show How To Play (?)"
   liftIO $ putStrLn "0. Exit"
   choice <- liftIO $ promptInt "Enter your choice: "
   liftIO $ putStrLn ""
@@ -416,6 +422,16 @@ mainMenu = do
     4 -> modifyLeaderboard
     5 -> removeRecordFormLeaderboard
     6 -> resetLeaderboard
+    9 -> do
+      liftIO $ putStrLn "========= HOW TO PLAY ========="
+      liftIO $ putStrLn "1. Use wasd to move the tiles."
+      liftIO $ putStrLn "2. Tiles with the same number merge into one when they touch. "
+      liftIO $ putStrLn "3. Add them up to reach 2048!"
+      liftIO $ putStrLn ""
+      liftIO $ putStrLn "Good Luck and Have Fun :D"
+      liftIO $ putStrLn "==============================="
+      liftIO $ putStrLn ""
+      mainMenu
     0 -> do
       db <- get
       liftIO $ putStrLn ("Thanks for playing, " ++ currentPlayerName db)
@@ -425,6 +441,7 @@ main = do
   putStrLn "***********************************"
   putStrLn "****** 2048 GAME IN HASKELL *******"
   putStrLn "***** created by Jason Yapri ******"
+  putStrLn "**** https://jasonyapri.com/ ******"
   putStrLn "***********************************"
 
   putStrLn ""
@@ -436,3 +453,9 @@ main = do
       putStrLn "Come back anytime :D"
     Nothing ->
       putStrLn "Come back anytime :D"
+
+-- ****** 2048 GAME IN HASKELL *******
+
+-- ***** created by Jason Yapri ******
+
+-- **** https://jasonyapri.com/ ******
