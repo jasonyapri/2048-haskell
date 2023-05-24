@@ -56,7 +56,7 @@ ghci > main
 ![](https://i.ibb.co/YNSJ1Xd/image.png)
 
 6. Enter '2' to Show Leaderboard<br />
-![](https://i.ibb.co/5c3Yxjn/image.png)
+![](https://i.ibb.co/5LJ7Lh1/image.png)
 
 7. Enter '3' to Switch Player<br />
 ![](https://i.ibb.co/Yf6Tw3B/image.png)
