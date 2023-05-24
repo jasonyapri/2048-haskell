@@ -186,8 +186,8 @@ swipeUp db =
       (newArray, didntMove) = foldr moveColumn ([], True) transposedArray
       updatedArray = transpose newArray
    in if not didntMove && updatedArray /= originalArray
-        then db {board = updatedArray, didntMove = True}
-        else db {didntMove = False}
+        then db {board = updatedArray, didntMove = False}
+        else db {didntMove = True}
   where
     moveColumn :: [Int] -> ([[Int]], Bool) -> ([[Int]], Bool)
     moveColumn column (acc, didntMove) =
@@ -208,10 +208,11 @@ swipeUp db =
     padZeros lst len = lst ++ replicate (len - length lst) 0
 
 setBoardValues :: Database -> Database
-setBoardValues db = db {board = replicate 4 (replicate 4 1)}
+setBoardValues db = db {board = replicate 4 (replicate 4 9)}
 
 placeOrKeepTile :: Database -> StateT Database (MaybeT IO) (Database, Bool)
-placeOrKeepTile db =
+placeOrKeepTile db = do
+  -- liftIO $ putStrLn ("LOG: didntMove value: " ++ (show (didntMove db))) -- NOTE: Comment in production
   if not (didntMove db)
     then placeRandomTile db
     else return (db {didntMove = False}, False)
@@ -219,7 +220,6 @@ placeOrKeepTile db =
 playGame :: StateT Database (MaybeT IO) ()
 playGame = do
   db <- get
-  newGame
   -- Get Score and print it
   liftIO $ putStrLn ("Current Score: " ++ (show (currentScore db)))
 
@@ -315,7 +315,7 @@ mainMenu = do
   case choice of
     1 -> do
       db <- get
-
+      newGame
       playGame
     2 -> showLeaderboard
     3 -> switchPlayer
