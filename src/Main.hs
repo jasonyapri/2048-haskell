@@ -1,10 +1,11 @@
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Maybe
-import Control.Monad.Trans.State (StateT (runStateT), get, modify, put, state)
+import Control.Monad.Trans.State (StateT (runStateT), execStateT, get, modify, put, state)
 import Data.ByteString (find)
 import Data.Data (Data, Typeable)
 import System.IO
+import System.Random
 import Text.Printf
 
 data Record = Record
@@ -16,7 +17,12 @@ data Record = Record
 data Database = Database
   { records :: [Record],
     currentPlayerName :: String,
-    currentPlayerHighScore :: Int
+    currentPlayerHighScore :: Int,
+    currentScore :: Int,
+    board :: [[Int]],
+    gameOver :: Bool,
+    hasWon :: Bool,
+    didntMove :: Bool
   }
   deriving (Show)
 
@@ -25,8 +31,16 @@ initialDB =
   Database
     { records = [],
       currentPlayerName = "",
-      currentPlayerHighScore = 0
+      currentPlayerHighScore = 0,
+      currentScore = 0,
+      board = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+      gameOver = False,
+      hasWon = False,
+      didntMove = False
     }
+
+data Move = MoveUp | MoveDown | MoveLeft | MoveRight
+  deriving (Show)
 
 createRecord :: Record -> StateT Database (MaybeT IO) ()
 createRecord record = modify (\db -> db {records = record : records db})
@@ -98,12 +112,114 @@ askForName = do
   liftIO $ putStrLn ""
   setCurrentPlayerName name
 
+placeRandomTile :: Database -> StateT Database (MaybeT IO) (Database, Bool)
+placeRandomTile db = do
+  -- Retrieve the current state of the Database
+  let boardSize = length (board db)
+      emptyCells = [(row, col) | row <- [0 .. boardSize - 1], col <- [0 .. boardSize - 1], (board db !! row) !! col == 0]
+
+  -- Check if there are empty cells on the board
+  if null emptyCells
+    then do
+      -- No empty cells, game over
+      return (db, True)
+    else do
+      -- Choose a random empty cell
+      gen <- liftIO newStdGen
+      let randomIndex = fst $ randomR (0, length emptyCells - 1) gen
+          (row, col) = emptyCells !! randomIndex
+
+      let tile = 2
+
+      -- Place the tile on the board
+      let updatedBoard = update2DList (board db) row col tile
+
+      -- Update the state with the new board
+      let updatedDB = db {board = updatedBoard}
+      return (updatedDB, False)
+
+-- Helper function to update a value in a 2D list
+update2DList :: [[a]] -> Int -> Int -> a -> [[a]]
+update2DList list row col val =
+  take row list
+    ++ [take col (list !! row) ++ [val] ++ drop (col + 1) (list !! row)]
+    ++ drop (row + 1) list
+
+printBoard :: [[Int]] -> IO ()
+printBoard = mapM_ (putStrLn . unwords . map show)
+
+generateRandomNumber :: IO Int
+generateRandomNumber = randomRIO (1, 2048)
+
+newGame :: StateT Database (MaybeT IO) ()
+newGame = do
+  modify (\db -> db {currentScore = 0, board = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]})
+
+getPlayerMove :: IO Move
+getPlayerMove = do
+  putStrLn "Enter your move (wasd):"
+  moveStr <- getLine
+  case moveStr of
+    "w" -> return MoveUp
+    "a" -> return MoveLeft
+    "s" -> return MoveDown
+    "d" -> return MoveRight
+    _ -> do
+      putStrLn "Invalid move!\n"
+      getPlayerMove
+
+moveBoard :: Move -> Database -> Database
+moveBoard move db = case move of
+  MoveUp -> setBoardValues db
+  MoveDown -> setBoardValues db
+  MoveLeft -> setBoardValues db
+  MoveRight -> setBoardValues db
+
+-- To be defined
+setBoardValues :: Database -> Database
+setBoardValues db = db {board = replicate 4 (replicate 4 1)}
+
+placeOrKeepTile :: Database -> StateT Database (MaybeT IO) (Database, Bool)
+placeOrKeepTile db =
+  if not (didntMove db)
+    then placeRandomTile db
+    else return (db {didntMove = False}, False)
+
 playGame :: StateT Database (MaybeT IO) ()
 playGame = do
-  liftIO $ putStrLn "10 minutes later..."
-  liftIO $ putStrLn "You have played a game!"
-  liftIO $ putStrLn ""
-  mainMenu
+  db <- get
+
+  -- Get Score and print it
+  liftIO $ putStrLn ("Current Score: " ++ (show (currentScore db)))
+
+  -- Generate a random tile 2 and place it on the board
+  let isGameOver = gameOver db
+  (dbWithTile, isGameOver) <- placeOrKeepTile db
+
+  -- Print the updated board
+  liftIO $ putStrLn "Current board:"
+  liftIO $ printBoard (board dbWithTile)
+
+  -- Check if the game is over
+  if isGameOver
+    then do
+      liftIO $ putStrLn "Game over!"
+      let score = currentScore dbWithTile
+      liftIO $ putStrLn ("Your score: " ++ show score)
+      liftIO $ putStrLn ""
+      mainMenu
+    else do
+      -- Read the player's move
+      move <- liftIO getPlayerMove
+
+      -- Perform the move and update the game state
+      let newDB = moveBoard move dbWithTile
+      liftIO $ putStrLn ""
+      -- Update the state with the new database
+      put newDB
+
+      -- Continue playing the game
+      playGame
 
 showRecord :: Record -> String
 showRecord r = printf "%-20s %10d" (name r) (score r)
