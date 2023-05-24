@@ -178,9 +178,9 @@ getPlayerMove = do
 moveBoard :: Move -> Database -> Database
 moveBoard move db = case move of
   MoveUp -> swipeUp db
-  MoveDown -> setBoardValues db
-  MoveLeft -> setBoardValues db
-  MoveRight -> setBoardValues db
+  MoveDown -> swipeDown db
+  MoveLeft -> swipeLeft db
+  MoveRight -> swipeRight db
   MoveExit -> setBoardValues db
 
 -- Move functions be defined
@@ -211,6 +211,88 @@ swipeUp db =
 
     padZeros :: [Int] -> Int -> [Int]
     padZeros lst len = lst ++ replicate (len - length lst) 0
+
+swipeDown :: Database -> Database
+swipeDown db =
+  let originalArray = board db
+      reversedArray = reverse originalArray
+      transposedArray = transpose reversedArray
+      (newArray, didntMove) = foldr moveColumn ([], True) transposedArray
+      updatedArray = reverse (transpose newArray)
+   in if not didntMove && updatedArray /= originalArray
+        then db {board = updatedArray, didntMove = False}
+        else db {didntMove = True}
+  where
+    moveColumn :: [Int] -> ([[Int]], Bool) -> ([[Int]], Bool)
+    moveColumn column (acc, didntMove) =
+      let nonZeroValues = [value | value <- column, value /= 0]
+          mergedColumn = mergeAdjacent nonZeroValues
+          newColumn = padZeros mergedColumn (length column)
+          updatedAcc = newColumn : acc
+       in (updatedAcc, didntMove && (column == newColumn))
+
+    mergeAdjacent :: [Int] -> [Int]
+    mergeAdjacent [] = []
+    mergeAdjacent [x] = [x]
+    mergeAdjacent (x : y : xs)
+      | x == y = x * 2 : mergeAdjacent xs
+      | otherwise = x : mergeAdjacent (y : xs)
+
+    padZeros :: [Int] -> Int -> [Int]
+    padZeros lst len = lst ++ replicate (len - length lst) 0
+
+swipeLeft :: Database -> Database
+swipeLeft db =
+  let originalArray = board db
+      (newArray, didntMove) = foldr moveRow ([], True) originalArray
+   in if not didntMove && newArray /= originalArray
+        then db {board = newArray, didntMove = False}
+        else db {didntMove = True}
+  where
+    moveRow :: [Int] -> ([[Int]], Bool) -> ([[Int]], Bool)
+    moveRow row (acc, didntMove) =
+      let nonZeroValues = [value | value <- row, value /= 0]
+          mergedRow = mergeAdjacent nonZeroValues
+          newRow = padZeros mergedRow (length row)
+          updatedAcc = newRow : acc
+       in (updatedAcc, didntMove && (row == newRow))
+
+    mergeAdjacent :: [Int] -> [Int]
+    mergeAdjacent [] = []
+    mergeAdjacent [x] = [x]
+    mergeAdjacent (x : y : xs)
+      | x == y = x * 2 : mergeAdjacent xs
+      | otherwise = x : mergeAdjacent (y : xs)
+
+    padZeros :: [Int] -> Int -> [Int]
+    padZeros lst len = lst ++ replicate (len - length lst) 0
+
+swipeRight :: Database -> Database
+swipeRight db =
+  let originalArray = board db
+      (newArray, didntMove) = foldr moveRow ([], True) originalArray
+      updatedArray = newArray
+   in if not didntMove && updatedArray /= originalArray
+        then db {board = updatedArray, didntMove = False}
+        else db {didntMove = True}
+  where
+    moveRow :: [Int] -> ([[Int]], Bool) -> ([[Int]], Bool)
+    moveRow row (acc, didntMove) =
+      let nonZeroValues = [value | value <- row, value /= 0]
+          mergedRow = mergeAdjacent nonZeroValues
+          newRow = padZeros mergedRow (length row)
+          updatedAcc = newRow : acc
+       in (updatedAcc, didntMove && (row == newRow))
+
+    mergeAdjacent :: [Int] -> [Int]
+    mergeAdjacent [] = []
+    mergeAdjacent [x] = [x]
+    mergeAdjacent (x : y : xs)
+      | x == y = x * 2 : mergeAdjacent xs
+      | otherwise = x : mergeAdjacent (y : xs)
+
+    padZeros :: [Int] -> Int -> [Int]
+    padZeros lst len = replicate (len - length lst) 0 ++ lst
 
 setBoardValues :: Database -> Database
 setBoardValues db = db {board = replicate 4 (replicate 4 9)}
