@@ -36,56 +36,61 @@ ghci > main
 
 # Step by Step Walkthrough
 
-1. After running the game, first thing you need to do is enter your name.
+1. After running the game, first thing you need to do is enter your name.<br />
 ![](https://i.ibb.co/JRtXwrg/image.png)
-2. Then you will be greeted with the Main Menu (8 options)
+2. Then you will be greeted with the Main Menu (8 options)<br />
 ![](https://i.ibb.co/QPVxCVN/image.png)
-3. Choose your desired action entering the number on the Main Menu
-4. Enter '9' to Show How To Play (?)
+3. Choose your desired action entering the number on the Main Menu<br />
+4. Enter '9' to Show How To Play (?)<br />
 ![](https://i.ibb.co/JyJXDKG/image.png)
-5. Enter '1' to Start Playing
-![](https://i.ibb.co/m4BQJ8B/image.png)
-![](https://i.ibb.co/0JHndn7/image.png)
-![](https://i.ibb.co/XWRTDph/image.png)
+5. Enter '1' to Start Playing<br />
+![](https://i.ibb.co/m4BQJ8B/image.png)<br />
+![](https://i.ibb.co/0JHndn7/image.png)<br />
+![](https://i.ibb.co/XWRTDph/image.png)<br />
 ![](https://i.ibb.co/WfCwJy4/image.png)
 - Enter 'w' to move the tile up
 - Enter 'a' to move the tile left
 - Enter 's' to move the tile down
 - Enter 'd' to move the tile right
-- Enter 'q' to go back to the main menu
+- Enter 'q' to go back to the main menu<br />
 ![](https://i.ibb.co/YNSJ1Xd/image.png)
-6. Enter '2' to Show Leaderboard
+
+6. Enter '2' to Show Leaderboard<br />
 ![](https://i.ibb.co/5c3Yxjn/image.png)
-7. Enter '3' to Switch Player
+
+7. Enter '3' to Switch Player<br />
 ![](https://i.ibb.co/Yf6Tw3B/image.png)
-8. Enter '4' to Hack Leaderboard (Modify)
+
+8. Enter '4' to Hack Leaderboard (Modify)<br />
 ![](https://i.ibb.co/kK2VNFz/image.png)
 - We cannot enter a name that doesn't exist in the leaderboard yet.
-- Use Switch Player to input a new Player's name
-![](https://i.ibb.co/4s104rW/image.png)
+- Use Switch Player to input a new Player's name<br />
+![](https://i.ibb.co/4s104rW/image.png)<br />
 ![](https://i.ibb.co/nnMpHV4/image.png)
-9. Enter '5' to Hack Leaderboard (Remove)
+
+9. Enter '5' to Hack Leaderboard (Remove)<br />
 ![](https://i.ibb.co/TkDCJ7P/image.png)
 - We cannot remove a player that doesn't exist in the leaderboard.
-- Use Switch Player to input a new Player's name
+- Use Switch Player to input a new Player's name<br />
 ![](https://i.ibb.co/K2rDrBd/image.png)
 - You cannot remove current Player's score.
-- In my case, I cannot delete Stefan's score, as I am playing using Stefan.
-![](https://i.ibb.co/VYnr6qd/image.png)
-![](https://i.ibb.co/vZdS5Wc/image.png)
+- In my case, I cannot delete Stefan's score, as I am playing using Stefan.<br />
+![](https://i.ibb.co/VYnr6qd/image.png)<br />
+![](https://i.ibb.co/vZdS5Wc/image.png)<br />
 - Deleted Jason's score. View the changes by entering '2' (Show Leaderboard)
-10. Enter '6' to Hack Leaderboard (Reset)
-![](https://i.ibb.co/hD1GDBG/image.png)
+
+10. Enter '6' to Hack Leaderboard (Reset)<br />
+![](https://i.ibb.co/hD1GDBG/image.png)<br />
 ![](https://i.ibb.co/N2jt052/image.png)
-11. Enter '0' to Exit Game
+11. Enter '0' to Exit Game<br />
 ![](https://i.ibb.co/Zm0jvy0/image.png)
 
 # Created by
-Jason Yapri
-https://linkedin.com/in/jasonyapri/
+Jason Yapri<br />
+https://linkedin.com/in/jasonyapri/<br />
 https://jasonyapri.com
 
 # Reference
-https://play2048.co/
-(Created by Gabriele Cirulli)
+https://play2048.co/<br />
+(Created by Gabriele Cirulli)<br />
 ![2048 Game on Website](https://i.ibb.co/sPHbBqC/image.png)
