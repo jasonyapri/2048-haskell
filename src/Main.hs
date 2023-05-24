@@ -5,6 +5,7 @@ import Control.Monad.Trans.State (StateT (runStateT), execStateT, get, modify, p
 import Data.ByteString (find)
 import Data.Data (Data, Typeable)
 import Data.List (transpose)
+import Data.Maybe (fromMaybe)
 import System.IO
 import System.Random
 import Text.Printf
@@ -45,6 +46,14 @@ data Move = MoveUp | MoveDown | MoveLeft | MoveRight | MoveExit
 
 createRecord :: Record -> StateT Database (MaybeT IO) ()
 createRecord record = modify (\db -> db {records = record : records db})
+
+readHighScore :: String -> StateT Database (MaybeT IO) (Maybe Int)
+readHighScore input = do
+  db <- get
+  let matchingRecords = filter (\record -> input == name record) (records db)
+  case matchingRecords of
+    [] -> return Nothing
+    (p : _) -> return (Just (score p))
 
 readRecord :: String -> StateT Database (MaybeT IO) (Maybe Record)
 readRecord input = do
@@ -217,27 +226,33 @@ placeOrKeepTile db = do
     then placeRandomTile db
     else return (db {didntMove = False}, False)
 
-playGame :: StateT Database (MaybeT IO) ()
-playGame = do
+playGame :: Int -> StateT Database (MaybeT IO) ()
+playGame score = do
   db <- get
   -- Get Score and print it
-  liftIO $ putStrLn ("Current Score: " ++ (show (currentScore db)))
+  liftIO $ putStrLn ("Your Score: " ++ show score)
 
   -- Generate a random tile 2 and place it on the board
   let isGameOver = gameOver db
   (dbWithTile, isGameOver) <- placeOrKeepTile db
 
   -- Print the updated board
-  liftIO $ putStrLn "Current board:"
+  liftIO $ putStrLn "Game Board:"
   liftIO $ printBoard (board dbWithTile)
 
   -- Check if the game is over
   if isGameOver
     then do
       liftIO $ putStrLn "Game over!"
-      let score = currentScore dbWithTile
-      liftIO $ putStrLn ("Your score: " ++ show score)
       liftIO $ putStrLn ""
+      -- Update the score only if there is a new high score
+      highScore <- readHighScore (currentPlayerName db)
+      if score > fromMaybe 0 highScore
+        then do
+          updateRecord (currentPlayerName db) score False
+          liftIO $ putStrLn ("Your last score: " ++ show score ++ "(NEW HIGH SCORE)")
+        else do
+          liftIO $ putStrLn ("Current high score: " ++ show (fromMaybe 0 highScore))
       mainMenu
     else do
       -- Read the player's move
@@ -250,7 +265,8 @@ playGame = do
       put newDB
 
       -- Continue playing the game
-      playGame
+      let newScore = sum (concat (board dbWithTile))
+      playGame newScore
 
 showRecord :: Record -> String
 showRecord r = printf "%-20s %10d" (name r) (score r)
@@ -316,7 +332,7 @@ mainMenu = do
     1 -> do
       db <- get
       newGame
-      playGame
+      playGame 0
     2 -> showLeaderboard
     3 -> switchPlayer
     4 -> modifyLeaderboard
