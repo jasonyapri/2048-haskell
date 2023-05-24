@@ -4,6 +4,7 @@ import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.State (StateT (runStateT), execStateT, get, modify, put, state)
 import Data.ByteString (find)
 import Data.Data (Data, Typeable)
+import Data.List (transpose)
 import System.IO
 import System.Random
 import Text.Printf
@@ -39,7 +40,7 @@ initialDB =
       didntMove = False
     }
 
-data Move = MoveUp | MoveDown | MoveLeft | MoveRight
+data Move = MoveUp | MoveDown | MoveLeft | MoveRight | MoveExit
   deriving (Show)
 
 createRecord :: Record -> StateT Database (MaybeT IO) ()
@@ -153,7 +154,7 @@ generateRandomNumber = randomRIO (1, 2048)
 
 newGame :: StateT Database (MaybeT IO) ()
 newGame = do
-  modify (\db -> db {currentScore = 0, board = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]})
+  modify (\db -> db {currentScore = 0, board = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], didntMove = False})
 
 getPlayerMove :: IO Move
 getPlayerMove = do
@@ -164,18 +165,48 @@ getPlayerMove = do
     "a" -> return MoveLeft
     "s" -> return MoveDown
     "d" -> return MoveRight
+    "q" -> return MoveExit
     _ -> do
       putStrLn "Invalid move!\n"
       getPlayerMove
 
 moveBoard :: Move -> Database -> Database
 moveBoard move db = case move of
-  MoveUp -> setBoardValues db
+  MoveUp -> swipeUp db
   MoveDown -> setBoardValues db
   MoveLeft -> setBoardValues db
   MoveRight -> setBoardValues db
+  MoveExit -> setBoardValues db
 
--- To be defined
+-- Move functions be defined
+swipeUp :: Database -> Database
+swipeUp db =
+  let originalArray = board db
+      transposedArray = transpose originalArray
+      (newArray, didntMove) = foldr moveColumn ([], True) transposedArray
+      updatedArray = transpose newArray
+   in if not didntMove && updatedArray /= originalArray
+        then db {board = updatedArray, didntMove = True}
+        else db {didntMove = False}
+  where
+    moveColumn :: [Int] -> ([[Int]], Bool) -> ([[Int]], Bool)
+    moveColumn column (acc, didntMove) =
+      let nonZeroValues = [value | value <- column, value /= 0]
+          mergedColumn = mergeAdjacent nonZeroValues
+          newColumn = padZeros mergedColumn (length column)
+          updatedAcc = newColumn : acc
+       in (updatedAcc, didntMove && (column == newColumn))
+
+    mergeAdjacent :: [Int] -> [Int]
+    mergeAdjacent [] = []
+    mergeAdjacent [x] = [x]
+    mergeAdjacent (x : y : xs)
+      | x == y = x * 2 : mergeAdjacent xs
+      | otherwise = x : mergeAdjacent (y : xs)
+
+    padZeros :: [Int] -> Int -> [Int]
+    padZeros lst len = lst ++ replicate (len - length lst) 0
+
 setBoardValues :: Database -> Database
 setBoardValues db = db {board = replicate 4 (replicate 4 1)}
 
@@ -188,7 +219,7 @@ placeOrKeepTile db =
 playGame :: StateT Database (MaybeT IO) ()
 playGame = do
   db <- get
-
+  newGame
   -- Get Score and print it
   liftIO $ putStrLn ("Current Score: " ++ (show (currentScore db)))
 
@@ -282,7 +313,10 @@ mainMenu = do
   choice <- liftIO $ promptInt "Enter your choice: "
   liftIO $ putStrLn ""
   case choice of
-    1 -> playGame
+    1 -> do
+      db <- get
+
+      playGame
     2 -> showLeaderboard
     3 -> switchPlayer
     4 -> modifyLeaderboard
