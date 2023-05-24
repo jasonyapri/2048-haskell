@@ -19,11 +19,9 @@ data Record = Record
 data Database = Database
   { records :: [Record],
     currentPlayerName :: String,
-    currentPlayerHighScore :: Int,
     currentScore :: Int,
     board :: [[Int]],
     gameOver :: Bool,
-    hasWon :: Bool,
     didntMove :: Bool
   }
   deriving (Show)
@@ -33,11 +31,9 @@ initialDB =
   Database
     { records = [],
       currentPlayerName = "",
-      currentPlayerHighScore = 0,
       currentScore = 0,
       board = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
       gameOver = False,
-      hasWon = False,
       didntMove = False
     }
 
@@ -167,7 +163,7 @@ newGame = do
 
 getPlayerMove :: IO Move
 getPlayerMove = do
-  putStrLn "Enter your move (wasd):"
+  putStrLn "Enter your move (wasd) or quit (q):"
   moveStr <- getLine
   case moveStr of
     "w" -> return MoveUp
