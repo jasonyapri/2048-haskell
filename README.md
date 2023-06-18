@@ -11,6 +11,9 @@ The game is played on a 4x4 grid, where the player combines tiles with the same 
 - Hack Leaderboard - Modify Player's Score
 - Hack Leaderboard - Remove Player from Leaderboard (Cannot remove Current Player | Need to switch player first)
 - Hack Leaderboard - Reset all scores in Leaderboard to 0
+- Keep logs of every menu that user chosed in logs.txt
+- Load leaderboard data from leaderboard.txt when starting the app
+- Save leaderboard data to leaderboard.txt when exiting the app
 
 # Getting Started
 To run the game, you need to have Haskell installed on your system. Follow these steps to get started:
