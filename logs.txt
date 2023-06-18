@@ -8,3 +8,26 @@
 [INFO] - Sunday, June 18, 2023 | 14:57:49 (GMT)  - Reseting Leaderboard
 [INFO] - Sunday, June 18, 2023 | 14:58:12 (GMT)  - Showing Game Instruction
 [INFO] - Sunday, June 18, 2023 | 14:58:18 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 16:14:04 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 16:16:01 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 16:16:05 (GMT)  - Switching Player
+[INFO] - Sunday, June 18, 2023 | 16:16:22 (GMT)  - Switching Player
+[INFO] - Sunday, June 18, 2023 | 16:43:42 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 16:44:03 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 16:47:14 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 16:47:24 (GMT)  - Removing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 16:47:28 (GMT)  - Removing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 16:47:32 (GMT)  - Removing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 16:47:35 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 16:47:40 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 16:50:28 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 16:52:45 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 17:00:24 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 17:00:37 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 17:00:46 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 17:00:48 (GMT)  - Initiating a new game
+[INFO] - Sunday, June 18, 2023 | 17:00:53 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 17:00:56 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 17:01:59 (GMT)  - Exiting game
+[INFO] - Sunday, June 18, 2023 | 17:02:21 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 17:02:24 (GMT)  - Exiting game

@@ -9,6 +9,7 @@ import Control.Monad.Trans.State (StateT (runStateT), execStateT, get, modify, p
 import Data.ByteString (find)
 import Data.Data (Data, Typeable)
 import Data.List (transpose)
+import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
 import Data.Time
 import Data.Time.Format
@@ -23,6 +24,10 @@ data Record = Record
     score :: Int
   }
   deriving (Show)
+
+type Name = String
+
+type Score = String
 
 data Database = Database
   { records :: [Record],
@@ -433,6 +438,12 @@ resetLeaderboard = do
   liftIO $ putStrLn ""
   mainMenu
 
+recordToString :: Record -> String
+recordToString (Record name score) = name ++ "\t" ++ show score
+
+databaseToString :: Database -> String
+databaseToString (Database records _ _ _ _ _) = unlines $ map recordToString records
+
 mainMenu :: StateT Database (MaybeT IO) ()
 mainMenu = do
   liftIO $ putStrLn "********** Main Menu **********"
@@ -475,6 +486,13 @@ mainMenu = do
         return ()
       db <- get
       liftIO $ putStrLn ("Thanks for playing, " ++ currentPlayerName db)
+      -- let outputContents = "A\t1024\nB\t512"
+      let outputContents = databaseToString db
+      liftIO $ writeFile "leaderboard.txt" outputContents
+      liftIO $ putStrLn ""
+      liftIO $ putStrLn "Saving leaderboard to database..."
+      liftIO $ putStrLn ""
+      liftIO $ putStrLn ""
 
 printNewGameLog :: StateT Log IO ()
 printNewGameLog = do
@@ -516,6 +534,18 @@ printExitGameLog = do
   recordLog "Exiting game"
   saveLogsToFile "logs.txt"
 
+parseLine :: String -> (Name, Score)
+parseLine line =
+  case splitOn "\t" line of
+    [name, score] -> (name, score)
+    _ -> ("", "")
+
+processNameAndScore :: (Name, Score) -> StateT Database (MaybeT IO) ()
+processNameAndScore (name, score) = do
+  let record = Record name (read score :: Int)
+  nameExists <- checkNameExists name
+  unless nameExists $ createRecord record
+
 main :: IO ()
 main = do
   putStrLn "***********************************"
@@ -525,9 +555,21 @@ main = do
   putStrLn "***********************************"
   putStrLn ""
 
-  let combinedActions = askForName >> mainMenu
+  putStrLn "Loading leaderboard from database..."
+  handle <- openFile "leaderboard.txt" ReadMode
+  contents <- liftIO $ hGetContents handle
+  liftIO $ putStr contents
+  liftIO $ hClose handle
+  putStrLn ""
+  putStrLn ""
+
+  let linesOfContent = lines contents
+  let nameAndScores = map parseLine linesOfContent
+
+  let combinedActions = mapM_ processNameAndScore nameAndScores >> askForName >> mainMenu
 
   result <- runMaybeT (runStateT combinedActions initialDB)
+
   case result of
     Just (_, finalDatabase) -> do
       putStrLn "Come back anytime :D"
