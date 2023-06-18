@@ -1,0 +1,10 @@
+
+[INFO] - Sunday, June 18, 2023 | 14:57:20 (GMT)  - Initiating a new game
+[INFO] - Sunday, June 18, 2023 | 14:57:22 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 14:57:27 (GMT)  - Switching Player
+[INFO] - Sunday, June 18, 2023 | 14:57:30 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 14:57:33 (GMT)  - Modifying Leaderboard
+[INFO] - Sunday, June 18, 2023 | 14:57:39 (GMT)  - Showing Leaderboard
+[INFO] - Sunday, June 18, 2023 | 14:57:49 (GMT)  - Reseting Leaderboard
+[INFO] - Sunday, June 18, 2023 | 14:58:12 (GMT)  - Showing Game Instruction
+[INFO] - Sunday, June 18, 2023 | 14:58:18 (GMT)  - Exiting game

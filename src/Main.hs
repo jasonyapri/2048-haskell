@@ -10,9 +10,13 @@ import Data.ByteString (find)
 import Data.Data (Data, Typeable)
 import Data.List (transpose)
 import Data.Maybe (fromMaybe)
+import Data.Time
+import Data.Time.Format
 import System.IO
 import System.Random
 import Text.Printf
+
+type Log = [String]
 
 data Record = Record
   { name :: String,
@@ -43,6 +47,18 @@ initialDB =
 
 data Move = MoveUp | MoveDown | MoveLeft | MoveRight | MoveExit
   deriving (Show)
+
+recordLog :: String -> StateT Log IO ()
+recordLog entry = do
+  currentTime <- liftIO getCurrentTime -- Get the current time in IO monad
+  let timestamp = formatTime defaultTimeLocale "%A, %B %d, %Y | %H:%M:%S" currentTime
+  modify (\log -> ("[INFO] - " ++ timestamp ++ " (GMT) " ++ " - " ++ entry) : log)
+
+saveLogsToFile :: FilePath -> StateT Log IO ()
+saveLogsToFile filepath = do
+  logs <- get
+  liftIO $ withFile filepath AppendMode $ \h -> do
+    mapM_ (hPutStrLn h) (reverse logs)
 
 createRecord :: Record -> StateT Database (MaybeT IO) ()
 createRecord record = modify (\db -> db {records = record : records db})
@@ -163,6 +179,9 @@ generateRandomNumber = randomRIO (1, 2048)
 
 newGame :: StateT Database (MaybeT IO) ()
 newGame = do
+  liftIO $ do
+    (_, _) <- runStateT printNewGameLog []
+    return ()
   modify (\db -> db {currentScore = 0, board = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], didntMove = False})
 
 getPlayerMove :: IO Move
@@ -356,6 +375,9 @@ showRecord r = printf "%-20s %10d" (name r) (score r)
 
 showLeaderboard :: StateT Database (MaybeT IO) ()
 showLeaderboard = do
+  liftIO $ do
+    (_, _) <- runStateT printShowLeaderboardLog []
+    return ()
   db <- get
   let header = printf "%-20s %10s\n" "Name" "Score"
   let recordsList = map showRecord (records db)
@@ -365,11 +387,17 @@ showLeaderboard = do
 
 switchPlayer :: StateT Database (MaybeT IO) ()
 switchPlayer = do
+  liftIO $ do
+    (_, _) <- runStateT printSwitchPlayerLog []
+    return ()
   askForName
   mainMenu
 
 modifyLeaderboard :: StateT Database (MaybeT IO) ()
 modifyLeaderboard = do
+  liftIO $ do
+    (_, _) <- runStateT printModifyLeaderboardLog []
+    return ()
   name <- liftIO $ promptString "Enter a name: "
   score <- liftIO $ promptInt "Enter the score: "
   updateRecord name score True
@@ -378,6 +406,9 @@ modifyLeaderboard = do
 
 removeRecordFormLeaderboard :: StateT Database (MaybeT IO) ()
 removeRecordFormLeaderboard = do
+  liftIO $ do
+    (_, _) <- runStateT printRemoveLeaderboardLog []
+    return ()
   name <- liftIO $ promptString "Enter record's name: "
   db <- get
   if name == currentPlayerName db
@@ -390,6 +421,9 @@ removeRecordFormLeaderboard = do
 
 resetLeaderboard :: StateT Database (MaybeT IO) ()
 resetLeaderboard = do
+  liftIO $ do
+    (_, _) <- runStateT printResetLeaderboardLog []
+    return ()
   modify (\db -> db {records = []})
   db <- get
   let record = Record (currentPlayerName db) 0
@@ -423,6 +457,9 @@ mainMenu = do
     5 -> removeRecordFormLeaderboard
     6 -> resetLeaderboard
     9 -> do
+      liftIO $ do
+        (_, _) <- runStateT printShowGameInstructionLog []
+        return ()
       liftIO $ putStrLn "========= HOW TO PLAY ========="
       liftIO $ putStrLn "1. Use wasd to move the tiles."
       liftIO $ putStrLn "2. Tiles with the same number merge into one when they touch. "
@@ -433,8 +470,51 @@ mainMenu = do
       liftIO $ putStrLn ""
       mainMenu
     0 -> do
+      liftIO $ do
+        (_, _) <- runStateT printExitGameLog []
+        return ()
       db <- get
       liftIO $ putStrLn ("Thanks for playing, " ++ currentPlayerName db)
+
+printNewGameLog :: StateT Log IO ()
+printNewGameLog = do
+  recordLog "Initiating a new game"
+  saveLogsToFile "logs.txt"
+
+printShowLeaderboardLog :: StateT Log IO ()
+printShowLeaderboardLog = do
+  recordLog "Showing Leaderboard"
+  saveLogsToFile "logs.txt"
+
+printSwitchPlayerLog :: StateT Log IO ()
+printSwitchPlayerLog = do
+  recordLog "Switching Player"
+  saveLogsToFile "logs.txt"
+
+printModifyLeaderboardLog :: StateT Log IO ()
+printModifyLeaderboardLog = do
+  recordLog "Modifying Leaderboard"
+  saveLogsToFile "logs.txt"
+
+printRemoveLeaderboardLog :: StateT Log IO ()
+printRemoveLeaderboardLog = do
+  recordLog "Removing Leaderboard"
+  saveLogsToFile "logs.txt"
+
+printResetLeaderboardLog :: StateT Log IO ()
+printResetLeaderboardLog = do
+  recordLog "Reseting Leaderboard"
+  saveLogsToFile "logs.txt"
+
+printShowGameInstructionLog :: StateT Log IO ()
+printShowGameInstructionLog = do
+  recordLog "Showing Game Instruction"
+  saveLogsToFile "logs.txt"
+
+printExitGameLog :: StateT Log IO ()
+printExitGameLog = do
+  recordLog "Exiting game"
+  saveLogsToFile "logs.txt"
 
 main :: IO ()
 main = do
@@ -443,8 +523,8 @@ main = do
   putStrLn "***** created by Jason Yapri ******"
   putStrLn "**** https://jasonyapri.com/ ******"
   putStrLn "***********************************"
-
   putStrLn ""
+
   let combinedActions = askForName >> mainMenu
 
   result <- runMaybeT (runStateT combinedActions initialDB)
