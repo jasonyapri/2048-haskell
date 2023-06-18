@@ -22,16 +22,16 @@ git clone https://github.com/jasonyapri/2048-haskell.git
 
 2. Navigate to the src project directory:
 ```shell
-cd 2048-haskell/src
+cd 2048-haskell
 ```
 
-3. Run the project
+3. Build the Project and Run the App
 ```shell
-ghci Main.hs
+cabal build
 ```
 
 ```shell
-ghci > main
+cabal run
 ```
 
 # Step by Step Walkthrough
